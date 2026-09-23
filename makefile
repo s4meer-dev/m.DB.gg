@@ -21,3 +21,4 @@ uv_sync:
 
 uv_update:
 	cd backend && uv lock --upgrade
+# Use 'make build' to build and start containers in detached mode
