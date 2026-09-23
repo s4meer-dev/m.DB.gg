@@ -26,3 +26,4 @@ volumes:
     driver: local
   cache-storage:
     driver: local
+# Persistent local volumes preserve ingested documents, generated reports, and cache
