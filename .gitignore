@@ -191,10 +191,8 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# ===== FRONTEND (Next.js/Node.js) =====
-
-# Exclude frontend directory entirely
-frontend
+# ===== FRONTEND =====
+# Track frontend source files in repository
 
 # Dependencies
 frontend/node_modules

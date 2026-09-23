@@ -70,9 +70,40 @@ try:
 except ImportError as e:
     logger.warning(f"⚠️ Could not load reports endpoints: {e}")
 
-# Health check endpoint
+try:
+    from api.routes.demo import router as platform_router
+    app.include_router(platform_router)
+    logger.info("✅ Interactive Platform & Demo endpoints loaded")
+except Exception as e:
+    logger.warning(f"⚠️ Could not load interactive platform endpoints: {e}")
+
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+if FRONTEND_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
+
 @app.get("/")
 async def read_root(request: Request):
+    index_file = FRONTEND_DIR / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file))
+    return {
+        "message": "Document Intelligence API is running",
+        "version": "1.0.0",
+        "features": [
+            "Visual document extraction",
+            "voyage-context-3 embeddings",
+            "Multi-document Q&A",
+            "Visual reference tracking",
+            "AWS Bedrock integration"
+        ]
+    }
+
+@app.get("/api/status")
+async def api_status():
     return {
         "message": "Document Intelligence API is running",
         "version": "1.0.0",
