@@ -1,461 +1,665 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FSI Document Intelligence Workbench | MongoDB Atlas + LangGraph</title>
+  <title>Document Intelligence — MongoDB Atlas &amp; LangGraph Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
-  <div class="bg-grid-overlay"></div>
-
-  <!-- Sticky Top Command Header -->
-  <header class="top-navbar">
-    <div class="brand-group">
-      <div class="mongo-leaf-badge">
-        <i class="fa-solid fa-database"></i>
-      </div>
-      <div>
-        <div class="brand-title">
-          FSI Document Intelligence
-          <span class="uc-badge" style="color: var(--mongo-green); border: 1px solid rgba(0,237,100,0.3);">MongoDB Atlas + LangGraph</span>
+  <div class="app-layout">
+    <!-- =====================================================================
+         LEFT SIDEBAR NAVIGATION
+         ===================================================================== -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-mark">
+          <i class="fa-solid fa-layer-group"></i>
         </div>
-        <div class="brand-subtitle">Unified Multi-Agent Ingestion • Self-Correcting Agentic RAG • Automated PDF Reporting</div>
-      </div>
-    </div>
-
-    <!-- Ordered Step-by-Step Navigation -->
-    <nav class="step-nav">
-      <a href="#step-1-domain" class="step-nav-link active"><span class="step-num-badge">01</span> Choose Domain</a>
-      <a href="#step-2-vault" class="step-nav-link"><span class="step-num-badge">02</span> Document Vault</a>
-      <a href="#step-3-ingestion" class="step-nav-link"><span class="step-num-badge">03</span> Multi-Agent Ingestion</a>
-      <a href="#step-4-rag" class="step-nav-link"><span class="step-num-badge">04</span> Agentic RAG Q&amp;A</a>
-      <a href="#step-5-reports" class="step-nav-link"><span class="step-num-badge">05</span> Executive PDF Reports</a>
-      <a href="#step-6-mongodb" class="step-nav-link"><span class="step-num-badge">06</span> MongoDB Explorer</a>
-    </nav>
-
-    <div class="navbar-controls">
-      <div class="live-db-pill" id="mongo-status-pill">
-        <span class="pulse-dot"></span>
-        <span id="mongo-status-text">MongoDB Connected (12 Collections)</span>
-      </div>
-      <select id="global-usecase-selector" class="global-usecase-select" title="Switch Active FSI Use Case">
-        <option value="credit_rating">📊 Credit Rating Analysis</option>
-        <option value="kyc_onboarding">🛡️ KYC &amp; AML Onboarding</option>
-        <option value="loan_origination">🏠 Mortgage Loan Origination</option>
-        <option value="investment_research">📈 Equity &amp; Sector Research</option>
-        <option value="payment_processing_exception">💸 Payment Exception Triage</option>
-      </select>
-      <a href="/docs" target="_blank" class="btn-secondary" title="Open FastAPI Swagger UI">
-        <i class="fa-solid fa-code"></i> Swagger API
-      </a>
-    </div>
-  </header>
-
-  <main class="main-container">
-    <!-- NEW VISITOR GUIDED BANNER -->
-    <section class="onboarding-banner">
-      <div class="onboarding-header">
         <div>
-          <div class="hero-eyebrow">
-            <i class="fa-solid fa-compass"></i> Interactive Guided Workbench — Zero Prior Setup Required
-          </div>
-          <h1 class="hero-title">
-            How <span>MongoDB Atlas</span> Powers Enterprise AI Document Workflows
-          </h1>
-          <p class="hero-desc">
-            New here? Follow the <strong>6 numbered steps below in order</strong>. Instead of stitching together separate databases for metadata, documents, vectors, and chat memory, this project uses <strong>one MongoDB database (<code>document_intelligence</code>)</strong> to coordinate <strong>Supervisor Multi-Agent Ingestion</strong>, <strong>Self-Correcting Agentic RAG Q&amp;A</strong>, and <strong>Scheduled Executive PDF Reports</strong>.
-          </p>
+          <span class="brand-name">DocIntelligence</span>
+          <span class="brand-tag">MongoDB Atlas • LangGraph</span>
         </div>
-        <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
-          <button class="btn-primary" onclick="runFullGuidedDemo()">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Run Full Demo Tour
+      </div>
+
+      <!-- Global Active Use-Case Selector -->
+      <div class="sidebar-domain-box">
+        <label class="sidebar-label" for="global-domain-select">Active FSI Domain</label>
+        <select id="global-domain-select" class="domain-select-control">
+          <option value="credit_rating">Credit Rating Analysis</option>
+          <option value="kyc_onboarding">KYC &amp; AML Onboarding</option>
+          <option value="loan_origination">Mortgage Loan Origination</option>
+          <option value="investment_research">Equity &amp; Sector Research</option>
+          <option value="payment_processing_exception">Payment Exception Triage</option>
+        </select>
+      </div>
+
+      <!-- Primary Navigation Groups -->
+      <div class="nav-group">
+        <span class="sidebar-label">Getting Started</span>
+        <button class="nav-item active" data-view="overview" onclick="switchView('overview')">
+          <span class="nav-item-left">
+            <i class="fa-solid fa-compass"></i>
+            <span>Overview &amp; Domains</span>
+          </span>
+          <span class="nav-step-pill">Start</span>
+        </button>
+      </div>
+
+      <div class="nav-group">
+        <span class="sidebar-label">AI Workflow Pipeline</span>
+        <button class="nav-item" data-view="vault" onclick="switchView('vault')">
+          <span class="nav-item-left">
+            <i class="fa-regular fa-folder-open"></i>
+            <span>Document Vault</span>
+          </span>
+          <span class="nav-step-pill">Step 1</span>
+        </button>
+
+        <button class="nav-item" data-view="ingestion" onclick="switchView('ingestion')">
+          <span class="nav-item-left">
+            <i class="fa-solid fa-microchip"></i>
+            <span>Multi-Agent Ingestion</span>
+          </span>
+          <span class="nav-step-pill">Step 2</span>
+        </button>
+
+        <button class="nav-item" data-view="qa" onclick="switchView('qa')">
+          <span class="nav-item-left">
+            <i class="fa-regular fa-comment-dots"></i>
+            <span>Agentic Q&amp;A Assistant</span>
+          </span>
+          <span class="nav-step-pill">Step 3</span>
+        </button>
+      </div>
+
+      <div class="nav-group">
+        <span class="sidebar-label">Insights &amp; Database</span>
+        <button class="nav-item" data-view="reports" onclick="switchView('reports')">
+          <span class="nav-item-left">
+            <i class="fa-regular fa-file-pdf"></i>
+            <span>Executive PDF Reports</span>
+          </span>
+          <span class="nav-step-pill">Step 4</span>
+        </button>
+
+        <button class="nav-item" data-view="database" onclick="switchView('database')">
+          <span class="nav-item-left">
+            <i class="fa-solid fa-database"></i>
+            <span>MongoDB Explorer</span>
+          </span>
+          <span class="nav-step-pill">13 Cols</span>
+        </button>
+      </div>
+
+      <!-- Sidebar Footer: Live Database Connection Status -->
+      <div class="sidebar-footer">
+        <div class="db-connection-card">
+          <span class="status-dot"></span>
+          <div style="min-width:0;">
+            <div style="font-size:0.78rem; font-weight:600; color:var(--color-text);">MongoDB Connected</div>
+            <div id="sidebar-db-stats" style="font-size:0.71rem; color:var(--color-text-muted); font-family:var(--font-mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              document_intelligence
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- =====================================================================
+         MAIN CONTENT AREA
+         ===================================================================== -->
+    <div class="app-main">
+      <!-- Sticky Context Header -->
+      <header class="app-topbar">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
           </button>
-          <a href="#step-4-rag" class="btn-secondary">
-            <i class="fa-solid fa-comments"></i> Jump to AI Q&amp;A
+          <div class="topbar-breadcrumb">
+            <span id="topbar-section-category">Getting Started</span>
+            <span>/</span>
+            <strong id="topbar-section-title">Overview &amp; Domains</strong>
+            <span class="badge badge-success" id="topbar-active-domain-badge" style="margin-left:8px;">
+              Credit Rating
+            </span>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-ghost" onclick="toggleTheme()" title="Switch Dark / Light Mode">
+            <i class="fa-solid fa-circle-half-stroke" id="theme-icon"></i>
+            <span style="font-size:0.8rem;">Theme</span>
+          </button>
+          <a href="/docs" target="_blank" class="btn btn-ghost" title="Open FastAPI OpenAPI Specification">
+            <i class="fa-solid fa-code"></i>
+            <span style="font-size:0.8rem;">API Docs</span>
           </a>
+          <button class="btn btn-primary" id="topbar-next-step-btn" onclick="goToNextLogicalStep()">
+            <span>Step 1: Open Document Vault</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
         </div>
-      </div>
+      </header>
 
-      <!-- 6-Step Clickable Journey Map -->
-      <div class="quick-journey-grid">
-        <div class="journey-step-card" onclick="scrollToSection('step-1-domain')">
-          <span class="journey-step-num">STEP 01 • DOMAIN CONTEXT</span>
-          <div class="journey-step-title">Select FSI Use Case</div>
-          <div class="journey-step-sub">Pick Credit Rating, KYC, Loans, Research, or Payments to load its specialist AI persona.</div>
-        </div>
-        <div class="journey-step-card" onclick="scrollToSection('step-2-vault')">
-          <span class="journey-step-num">STEP 02 • DOCUMENT VAULT</span>
-          <div class="journey-step-title">Browse &amp; Upload Files</div>
-          <div class="journey-step-sub">Inspect real PDF/DOCX financial files or upload your own document into local storage.</div>
-        </div>
-        <div class="journey-step-card" onclick="scrollToSection('step-3-ingestion')">
-          <span class="journey-step-num">STEP 03 • PILLAR 1: INGESTION</span>
-          <div class="journey-step-title">5-Agent Supervisor Pipeline</div>
-          <div class="journey-step-sub">Watch Scanner, Evaluator, Claude Vision Extractor &amp; VoyageAI Context-3 embed chunks.</div>
-        </div>
-        <div class="journey-step-card" onclick="scrollToSection('step-4-rag')">
-          <span class="journey-step-num">STEP 04 • PILLAR 2: AGENTIC RAG</span>
-          <div class="journey-step-title">Self-Correcting Q&amp;A</div>
-          <div class="journey-step-sub">Ask questions, inspect LLM chunk grading (YES/NO), query rewriting &amp; cited answers.</div>
-        </div>
-        <div class="journey-step-card" onclick="scrollToSection('step-5-reports')">
-          <span class="journey-step-num">STEP 05 • PILLAR 3: REPORTING</span>
-          <div class="journey-step-title">Executive PDF Studio</div>
-          <div class="journey-step-sub">Inspect MongoDB section templates and preview real multi-page PDF reports inline.</div>
-        </div>
-        <div class="journey-step-card" onclick="scrollToSection('step-6-mongodb')">
-          <span class="journey-step-num">STEP 06 • DATABASE BACKBONE</span>
-          <div class="journey-step-title">Live MongoDB Explorer</div>
-          <div class="journey-step-sub">Browse real BSON/JSON records across all 12 MongoDB collections &amp; 1024-dim vectors.</div>
-        </div>
-      </div>
-    </section>
+      <!-- Focused View Workspace -->
+      <div class="view-container">
 
-    <!-- ===================================================================
-         STEP 01: CHOOSE YOUR FINANCIAL SERVICES USE CASE
-         =================================================================== -->
-    <section id="step-1-domain" class="workflow-section">
-      <div class="section-header">
-        <div>
-          <span class="section-step-tag"><i class="fa-solid fa-layer-group"></i> STEP 01 OF 06 • CHOOSE DOMAIN &amp; AI PERSONA</span>
-          <h2 class="section-title">1. Select a Financial Services Use Case</h2>
-          <p class="section-subtitle">
-            Click any of the 5 FSI domains below. Selecting a domain automatically reconfigures the <strong>Evaluator Agent rules</strong>, loads the matching <strong>Specialist AI Persona</strong> from MongoDB's <code>agent_personas</code> collection, and updates the Q&amp;A and PDF Report Studio below.
-          </p>
-        </div>
-      </div>
-
-      <div id="usecase-cards-container" class="usecase-grid">
-        <!-- Populated dynamically from /api/platform/overview -->
-      </div>
-    </section>
-
-    <!-- ===================================================================
-         STEP 02: DOCUMENT VAULT & LIVE MULTI-SOURCE UPLOAD
-         =================================================================== -->
-    <section id="step-2-vault" class="workflow-section">
-      <div class="section-header">
-        <div>
-          <span class="section-step-tag"><i class="fa-solid fa-folder-open"></i> STEP 02 OF 06 • MULTI-SOURCE DOCUMENT VAULT</span>
-          <h2 class="section-title">2. Inspect Source Documents or Upload Your Own</h2>
-          <p class="section-subtitle">
-            The system supports unified paths across <code>@local@</code>, <code>@s3@</code>, and <code>@gdrive@</code>. Below are the real seed PDFs &amp; Word documents currently on disk and indexed in MongoDB (`documents` collection), plus a live upload dropzone connected to <code>POST /api/upload/documents</code>.
-          </p>
-        </div>
-        <button class="btn-primary" onclick="scrollToSection('step-3-ingestion'); triggerSimulatedIngestion();">
-          <i class="fa-solid fa-play"></i> Ingest Active Use Case Documents →
-        </button>
-      </div>
-
-      <div class="split-grid-2">
-        <!-- Upload Box -->
-        <div class="upload-box">
-          <div class="uc-icon-box" style="width:54px;height:54px;font-size:1.4rem;">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
+        <!-- =================================================================
+             VIEW 0: OVERVIEW & DOMAIN SELECTION (HOME)
+             ================================================================= -->
+        <section id="view-overview" class="app-view active">
+          <div class="page-header">
+            <div>
+              <div class="page-eyebrow">UNIFIED AI DOCUMENT PLATFORM</div>
+              <h1 class="page-title">Financial Services Document Intelligence</h1>
+              <p class="page-description">
+                Select a financial domain below to configure the workspace. One MongoDB database (<code>document_intelligence</code>) stores your source files, 1024-dimension embeddings, agent evaluations, and multi-turn conversation memory.
+              </p>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-primary" onclick="switchView('vault')">
+                <span>Continue to Document Vault</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
           </div>
-          <h3 style="font-size:1.05rem;">Upload PDF / DOCX to Active Use Case</h3>
-          <p style="font-size:0.82rem; color:var(--text-secondary); max-width:360px;">
-            Files uploaded here are saved to <code>backend/data/seed/docs/fsi/&lt;use_case&gt;</code> via <code>POST /api/upload/documents</code>.
-          </p>
-          <input type="file" id="vault-file-input" accept=".pdf,.docx,.doc" style="display:none;" onchange="handleVaultUpload(event)" />
-          <div style="display:flex; gap:0.65rem; margin-top:0.4rem;">
-            <button class="btn-primary" onclick="document.getElementById('vault-file-input').click()">
-              <i class="fa-solid fa-file-arrow-up"></i> Choose File to Upload
-            </button>
-            <button class="btn-secondary" onclick="loadVaultDocuments()">
-              <i class="fa-solid fa-rotate"></i> Refresh Vault
-            </button>
-          </div>
-          <div id="upload-status-msg" style="font-family:var(--font-mono); font-size:0.76rem; color:var(--mongo-green); margin-top:0.35rem;"></div>
-        </div>
 
-        <!-- Existing Documents List -->
-        <div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-            <span style="font-weight:700; font-size:0.9rem;"><i class="fa-solid fa-files" style="color:var(--mongo-green);"></i> Local &amp; MongoDB Indexed Documents</span>
-            <span id="vault-count-badge" class="uc-badge">Loading...</span>
+          <!-- Calm 4-Metric System Summary -->
+          <div class="stat-strip">
+            <div class="stat-item">
+              <div class="stat-label">Active Use Case</div>
+              <div class="stat-value" id="stat-active-uc" style="font-size:1.2rem; color:var(--color-primary);">Credit Rating</div>
+              <div class="stat-meta" id="stat-active-persona">Persona: Credit Rating Analyst</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Seed &amp; Uploaded Files</div>
+              <div class="stat-value" id="stat-total-files">13</div>
+              <div class="stat-meta">PDF &amp; DOCX across 5 FSI domains</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Vector Embeddings</div>
+              <div class="stat-value" id="stat-total-chunks">22</div>
+              <div class="stat-meta">1024-dim VoyageAI Context-3</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">MongoDB Collections</div>
+              <div class="stat-value" id="stat-total-records">493</div>
+              <div class="stat-meta">Live records across 13 collections</div>
+            </div>
           </div>
-          <div id="vault-docs-list" class="doc-list-container">
-            <!-- Populated by loadVaultDocuments() -->
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- ===================================================================
-         STEP 03: PILLAR 1 — SUPERVISOR MULTI-AGENT INGESTION PIPELINE
-         =================================================================== -->
-    <section id="step-3-ingestion" class="workflow-section">
-      <div class="section-header">
-        <div>
-          <span class="section-step-tag"><i class="fa-solid fa-sitemap"></i> STEP 03 OF 06 • ARCHITECTURAL PILLAR 1</span>
-          <h2 class="section-title">3. Supervisor Multi-Agent Ingestion Simulator</h2>
-          <p class="section-subtitle">
-            Click <strong>"Run 5-Agent Ingestion Workflow"</strong> to watch how the LangGraph <strong>Supervisor Agent</strong> coordinates the <strong>Scanner</strong>, <strong>Evaluator</strong> (which filters out irrelevant files like lunch receipts!), <strong>Claude Sonnet Vision Extractor</strong>, and <strong>VoyageAI Context-3 Processor</strong> while persisting every state into MongoDB.
-          </p>
-        </div>
-        <button id="btn-run-ingestion" class="btn-primary" onclick="triggerSimulatedIngestion()">
-          <i class="fa-solid fa-bolt"></i> Run 5-Agent Ingestion Workflow
-        </button>
-      </div>
-
-      <!-- 5 Agent Pipeline Track -->
-      <div class="agent-pipeline-track">
-        <div class="agent-node-card" id="agent-card-1">
-          <div class="agent-node-header">
-            <span class="agent-step-chip">AGENT 01</span>
-            <i class="fa-solid fa-brain" style="color:var(--mongo-green);"></i>
+          <!-- Choose FSI Domain Grid -->
+          <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="font-size:1.05rem; font-weight:600;">Choose Your Financial Domain Context</h2>
+            <span style="font-size:0.82rem; color:var(--color-text-muted);">Click any card to switch the active AI persona &amp; documents</span>
           </div>
-          <div class="agent-node-title">Supervisor Agent</div>
-          <div class="agent-node-role">Central LangGraph coordinator routing tasks &amp; tracking state.</div>
-          <div class="agent-mongo-badge"><i class="fa-solid fa-database"></i> Writes: <code>workflows</code></div>
-        </div>
 
-        <div class="agent-node-card" id="agent-card-2">
-          <div class="agent-node-header">
-            <span class="agent-step-chip">AGENT 02</span>
-            <i class="fa-solid fa-magnifying-glass" style="color:var(--accent-cyan);"></i>
-          </div>
-          <div class="agent-node-title">Scanner Agent</div>
-          <div class="agent-node-role">Discovers files across <code>@local@</code>, <code>@s3@</code>, <code>@gdrive@</code> &amp; deduplicates.</div>
-          <div class="agent-mongo-badge"><i class="fa-solid fa-database"></i> Writes: <code>documents</code></div>
-        </div>
-
-        <div class="agent-node-card" id="agent-card-3">
-          <div class="agent-node-header">
-            <span class="agent-step-chip">AGENT 03</span>
-            <i class="fa-solid fa-filter-circle-check" style="color:var(--accent-amber);"></i>
-          </div>
-          <div class="agent-node-title">Evaluator Agent</div>
-          <div class="agent-node-role">Context-aware quality gate rejecting unrelated files (e.g. food receipts).</div>
-          <div class="agent-mongo-badge"><i class="fa-solid fa-database"></i> Writes: <code>assessments</code></div>
-        </div>
-
-        <div class="agent-node-card" id="agent-card-4">
-          <div class="agent-node-header">
-            <span class="agent-step-chip">AGENT 04</span>
-            <i class="fa-solid fa-eye" style="color:var(--accent-purple);"></i>
-          </div>
-          <div class="agent-node-title">Extractor Agent</div>
-          <div class="agent-node-role">Pure Vision AI (Claude Sonnet) converting pages &amp; tables to Markdown.</div>
-          <div class="agent-mongo-badge"><i class="fa-solid fa-database"></i> Writes: <code>documents</code></div>
-        </div>
-
-        <div class="agent-node-card" id="agent-card-5">
-          <div class="agent-node-header">
-            <span class="agent-step-chip">AGENT 05</span>
-            <i class="fa-solid fa-cubes" style="color:var(--mongo-green);"></i>
-          </div>
-          <div class="agent-node-title">Processor Agent</div>
-          <div class="agent-node-role">Generates 1024-dim <code>voyage-context-3</code> embeddings with doc context.</div>
-          <div class="agent-mongo-badge"><i class="fa-solid fa-database"></i> Writes: <code>chunks</code></div>
-        </div>
-      </div>
-
-      <!-- Live 3-Column Agent Output Inspector -->
-      <div class="ingestion-results-grid">
-        <!-- Evaluator Quality Gate Output -->
-        <div class="result-panel">
-          <div class="panel-heading">
-            <span><i class="fa-solid fa-shield-halved" style="color:var(--accent-amber);"></i> Evaluator Agent Quality Gate</span>
-            <span class="uc-badge">MongoDB: assessments</span>
-          </div>
-          <div id="evaluator-output-box" style="font-size:0.8rem; display:flex; flex-direction:column; gap:0.6rem;">
+          <div id="overview-domain-grid" class="domain-grid">
             <!-- Populated dynamically -->
           </div>
-        </div>
 
-        <!-- Claude Vision Markdown Output -->
-        <div class="result-panel">
-          <div class="panel-heading">
-            <span><i class="fa-solid fa-eye" style="color:var(--accent-purple);"></i> Claude Vision Extracted Markdown</span>
-            <span class="uc-badge">Preserves Tables &amp; Charts</span>
+          <div class="next-step-footer">
+            <div>
+              <div style="font-weight:600; font-size:0.95rem;">Ready to inspect or upload source documents?</div>
+              <div style="font-size:0.83rem; color:var(--color-text-secondary);">Step 1 lets you browse the files for your selected domain or upload a new PDF/Word document.</div>
+            </div>
+            <button class="btn btn-primary" onclick="switchView('vault')">
+              <span>Go to Step 1: Document Vault</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
           </div>
-          <pre id="vision-markdown-box" class="json-viewer-pre" style="max-height:210px; font-size:0.75rem; white-space:pre-wrap;"></pre>
-        </div>
+        </section>
 
-        <!-- VoyageAI Context-3 Vector Output -->
-        <div class="result-panel">
-          <div class="panel-heading">
-            <span><i class="fa-solid fa-wave-square" style="color:var(--mongo-green);"></i> Voyage-Context-3 Vector (1024-Dim)</span>
-            <span class="uc-badge">MongoDB: chunks</span>
+        <!-- =================================================================
+             VIEW 1: DOCUMENT VAULT & CRUD MANAGEMENT
+             ================================================================= -->
+        <section id="view-vault" class="app-view">
+          <div class="page-header">
+            <div>
+              <div class="page-eyebrow">STEP 1 OF 4 • SOURCE DOCUMENTS</div>
+              <h1 class="page-title">Document Vault</h1>
+              <p class="page-description">
+                Manage PDF and Word (<code>.docx</code>) documents across local storage (<code>@local@</code>), AWS S3 (<code>@s3@</code>), and Google Drive (<code>@gdrive@</code>). Upload new files or pass them to the Multi-Agent Ingestion pipeline.
+              </p>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <input type="file" id="file-upload-input" accept=".pdf,.docx,.doc" style="display:none;" onchange="uploadDocumentFile(event)" />
+              <button class="btn btn-secondary" onclick="document.getElementById('file-upload-input').click()">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Upload PDF / DOCX</span>
+              </button>
+              <button class="btn btn-primary" onclick="switchView('ingestion'); runIngestionWorkflow();">
+                <i class="fa-solid fa-play"></i>
+                <span>Run AI Ingestion on Domain →</span>
+              </button>
+            </div>
           </div>
-          <div style="font-size:0.76rem; color:var(--text-secondary);">
-            Each chunk vector encodes both the local paragraph and full-document semantics:
+
+          <!-- Search & Filter Toolbar -->
+          <div class="table-toolbar">
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                id="vault-search-input"
+                class="input-field"
+                placeholder="Search documents by filename or use case..."
+                oninput="renderVaultTable()"
+              />
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="btn btn-ghost" id="filter-domain-only-btn" onclick="toggleVaultDomainFilter()">
+                <i class="fa-solid fa-filter"></i>
+                <span id="filter-domain-label">Showing: Active Domain Only</span>
+              </button>
+              <button class="btn btn-ghost" onclick="fetchVaultFiles()">
+                <i class="fa-solid fa-rotate"></i>
+                <span>Refresh</span>
+              </button>
+            </div>
           </div>
-          <div id="vector-bars-container" class="vector-bars"></div>
-          <div id="vector-numbers-preview" style="font-family:var(--font-mono); font-size:0.72rem; color:var(--mongo-green); word-break:break-all;"></div>
-        </div>
-      </div>
-    </section>
 
-    <!-- ===================================================================
-         STEP 04: PILLAR 2 — SELF-CORRECTING AGENTIC RAG Q&A PLAYGROUND
-         =================================================================== -->
-    <section id="step-4-rag" class="workflow-section">
-      <div class="section-header">
-        <div>
-          <span class="section-step-tag"><i class="fa-solid fa-robot"></i> STEP 04 OF 06 • ARCHITECTURAL PILLAR 2</span>
-          <h2 class="section-title">4. Self-Correcting Agentic RAG Q&amp;A Playground</h2>
-          <p class="section-subtitle">
-            Click any <strong>Suggested Question</strong> below or type your own. Watch the agent retrieve 1024-dim chunks from MongoDB, run the <strong>Document Grader LLM</strong> (scoring each chunk <code>YES</code> or <code>NO</code> in MongoDB's <code>gradings</code> collection), rewrite queries when needed, and synthesize a cited answer with conversation memory (`checkpoints_aio`).
-          </p>
-        </div>
-      </div>
-
-      <!-- Active Persona Banner loaded from MongoDB agent_personas -->
-      <div class="persona-banner">
-        <div style="display:flex; align-items:center; gap:0.95rem;">
-          <div class="mongo-leaf-badge" style="width:46px;height:46px;">
-            <i class="fa-solid fa-user-tie"></i>
+          <!-- Clean Document Table -->
+          <div class="clean-table-wrapper">
+            <table class="clean-table">
+              <thead>
+                <tr>
+                  <th>Document Name</th>
+                  <th>Domain / Use Case</th>
+                  <th>Source Path</th>
+                  <th>Size</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="vault-table-body">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
           </div>
-          <div>
-            <div style="font-size:0.72rem; font-family:var(--font-mono); color:var(--mongo-green);">ACTIVE MONGODB PERSONA (agent_personas collection)</div>
-            <div id="qa-persona-name" style="font-size:1.1rem; font-weight:800;">Credit Rating Analyst</div>
-            <div id="qa-persona-greeting" style="font-size:0.82rem; color:var(--text-secondary);">Loading persona specialization...</div>
+
+          <div class="next-step-footer">
+            <div>
+              <div style="font-weight:600; font-size:0.95rem;">Next: Process these documents with the 5-Agent Supervisor Pipeline</div>
+              <div style="font-size:0.83rem; color:var(--color-text-secondary);">Watch how the Evaluator Agent screens out irrelevant files and Claude Vision extracts structured tables.</div>
+            </div>
+            <button class="btn btn-primary" onclick="switchView('ingestion')">
+              <span>Go to Step 2: Multi-Agent Ingestion</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
           </div>
-        </div>
-        <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-cyan);">
-          Memory Thread ID: <strong id="qa-thread-badge">session-fsi-001</strong>
-        </div>
-      </div>
+        </section>
 
-      <!-- One-Click Suggested Questions -->
-      <div style="font-size:0.78rem; font-weight:600; color:var(--text-secondary); margin-bottom:0.45rem;">
-        <i class="fa-solid fa-lightbulb" style="color:var(--accent-amber);"></i> Click a sample domain question to test immediately:
-      </div>
-      <div id="qa-suggested-chips" class="question-chips-row">
-        <!-- Populated dynamically -->
-      </div>
-
-      <!-- Question Input Bar -->
-      <div class="qa-input-bar">
-        <input
-          type="text"
-          id="qa-question-input"
-          class="qa-text-input"
-          placeholder="Ask any question about the ingested financial documents (e.g., What is the current credit rating and Debt/EBITDA leverage?)..."
-          onkeydown="if(event.key==='Enter') submitAgenticQA()"
-        />
-        <button id="btn-ask-qa" class="btn-primary" onclick="submitAgenticQA()">
-          <i class="fa-solid fa-paper-plane"></i> Ask Agentic RAG
-        </button>
-      </div>
-
-      <!-- Split View: Cited Answer + Self-Correcting LangGraph Reasoning & Chunk Grades -->
-      <div class="split-grid-2">
-        <!-- Left: Final Cited Answer & Sources -->
-        <div style="display:flex; flex-direction:column; gap:1rem;">
-          <div class="panel-heading">
-            <span><i class="fa-solid fa-file-shield" style="color:var(--mongo-green);"></i> Grounded Answer with Verified Citations</span>
-            <span id="qa-citation-count" class="uc-badge">Ready</span>
+        <!-- =================================================================
+             VIEW 2: PILLAR 1 — MULTI-AGENT SUPERVISOR INGESTION
+             ================================================================= -->
+        <section id="view-ingestion" class="app-view">
+          <div class="page-header">
+            <div>
+              <div class="page-eyebrow">STEP 2 OF 4 • ARCHITECTURAL PILLAR 1</div>
+              <h1 class="page-title">Supervisor Multi-Agent Ingestion</h1>
+              <p class="page-description">
+                A central LangGraph <strong>Supervisor Agent</strong> coordinates 4 specialized workers: <strong>Scanner</strong> (discovery &amp; deduplication), <strong>Evaluator</strong> (relevance gatekeeper), <strong>Extractor</strong> (Claude Vision Markdown), and <strong>Processor</strong> (VoyageAI Context-3 1024-dim vectors).
+              </p>
+            </div>
+            <div>
+              <button class="btn btn-primary" id="btn-trigger-ingestion" onclick="runIngestionWorkflow()">
+                <i class="fa-solid fa-bolt"></i>
+                <span>Run 5-Agent Ingestion Pipeline</span>
+              </button>
+            </div>
           </div>
-          <div id="qa-answer-output" class="qa-answer-box">
-            Click any suggested question above or click <strong>"Ask Agentic RAG"</strong> to execute a live retrieval, grading, and synthesis pass over MongoDB!
+
+          <!-- Contextual Loading / Status Banner -->
+          <div id="ingestion-status-banner" style="margin-bottom:20px; padding:12px 18px; border-radius:var(--radius-md); background:var(--color-surface); border:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="status-dot" id="ingestion-status-dot"></span>
+              <span id="ingestion-status-text" style="font-size:0.87rem; font-weight:500;">
+                Pipeline ready. Click "Run 5-Agent Ingestion Pipeline" to execute and log a new workflow in MongoDB.
+              </span>
+            </div>
+            <span class="badge" id="ingestion-workflow-id-badge">workflows collection</span>
           </div>
-          <div id="qa-citations-list" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
-        </div>
 
-        <!-- Right: LangGraph Self-Correction Trace & Document Grader Scores -->
-        <div style="display:flex; flex-direction:column; gap:1rem;">
-          <div class="panel-heading">
-            <span><i class="fa-solid fa-microchip" style="color:var(--accent-cyan);"></i> LangGraph Reasoning Trace &amp; Chunk Grader (<code>gradings</code>)</span>
-            <span class="uc-badge">Self-Correction Active</span>
+          <!-- 5-Step Pipeline Track -->
+          <div class="pipeline-stepper">
+            <div class="pipeline-step" id="pipe-step-1">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span class="badge">01 • Supervisor</span>
+                <i class="fa-solid fa-sitemap" style="color:var(--color-primary);"></i>
+              </div>
+              <div style="font-weight:600; font-size:0.92rem;">State Coordinator</div>
+              <div style="font-size:0.78rem; color:var(--color-text-secondary); margin-top:4px;">Routes tasks across worker agents &amp; logs state in <code>workflows</code>.</div>
+            </div>
+
+            <div class="pipeline-step" id="pipe-step-2">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span class="badge">02 • Scanner</span>
+                <i class="fa-solid fa-magnifying-glass" style="color:var(--color-info);"></i>
+              </div>
+              <div style="font-weight:600; font-size:0.92rem;">Document Discovery</div>
+              <div style="font-size:0.78rem; color:var(--color-text-secondary); margin-top:4px;">Scans <code>@local@</code>, <code>@s3@</code>, <code>@gdrive@</code> &amp; checks SHA-256 cache.</div>
+            </div>
+
+            <div class="pipeline-step" id="pipe-step-3">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span class="badge">03 • Evaluator</span>
+                <i class="fa-solid fa-shield-halved" style="color:var(--color-warning);"></i>
+              </div>
+              <div style="font-weight:600; font-size:0.92rem;">Quality Gatekeeper</div>
+              <div style="font-size:0.78rem; color:var(--color-text-secondary); margin-top:4px;">Scores domain relevance &amp; rejects unrelated files in <code>assessments</code>.</div>
+            </div>
+
+            <div class="pipeline-step" id="pipe-step-4">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span class="badge">04 • Extractor</span>
+                <i class="fa-solid fa-eye" style="color:var(--color-primary);"></i>
+              </div>
+              <div style="font-weight:600; font-size:0.92rem;">Claude Vision AI</div>
+              <div style="font-size:0.78rem; color:var(--color-text-secondary); margin-top:4px;">Converts PDF pages, tables &amp; charts into structured Markdown.</div>
+            </div>
+
+            <div class="pipeline-step" id="pipe-step-5">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span class="badge">05 • Processor</span>
+                <i class="fa-solid fa-cubes" style="color:var(--color-success);"></i>
+              </div>
+              <div style="font-weight:600; font-size:0.92rem;">Context-3 Embeddings</div>
+              <div style="font-size:0.78rem; color:var(--color-text-secondary); margin-top:4px;">Stores 1024-dim vectors with full-doc context in <code>chunks</code>.</div>
+            </div>
           </div>
-          <div id="qa-trace-container"></div>
-          <div id="qa-graded-chunks-container" style="display:flex; flex-direction:column; gap:0.55rem;"></div>
-        </div>
-      </div>
-    </section>
 
-    <!-- ===================================================================
-         STEP 05: PILLAR 3 — EXECUTIVE PDF REPORT STUDIO & TEMPLATE VIEWER
-         =================================================================== -->
-    <section id="step-5-reports" class="workflow-section">
-      <div class="section-header">
-        <div>
-          <span class="section-step-tag"><i class="fa-solid fa-file-pdf"></i> STEP 05 OF 06 • ARCHITECTURAL PILLAR 3</span>
-          <h2 class="section-title">5. Automated Executive PDF Report Studio</h2>
-          <p class="section-subtitle">
-            MongoDB's <code>report_templates</code> collection defines section-by-section semantic queries. The scheduler runs targeted vector searches for each section, generates charts via <code>matplotlib</code>, and compiles an executive PDF via <code>ReportLab</code>. Preview the real generated PDF for the active use case below!
-          </p>
-        </div>
-        <div style="display:flex; gap:0.65rem;">
-          <a id="btn-download-pdf" href="/api/reports/seed/fsi/credit_rating/download" target="_blank" class="btn-primary">
-            <i class="fa-solid fa-download"></i> Download Full PDF Report
-          </a>
-          <a id="btn-open-pdf-tab" href="/api/reports/seed/fsi/credit_rating/preview" target="_blank" class="btn-secondary">
-            <i class="fa-solid fa-up-right-from-square"></i> Open in New Tab
-          </a>
-        </div>
-      </div>
-
-      <div class="split-grid-2">
-        <!-- Left: MongoDB Report Template Schema (report_templates) -->
-        <div class="result-panel">
-          <div class="panel-heading">
-            <span><i class="fa-solid fa-list-check" style="color:var(--mongo-green);"></i> MongoDB Report Template Structure</span>
-            <span class="uc-badge">Collection: report_templates</span>
+          <!-- Progressive Disclosure Sub-Tabs for Pipeline Outputs -->
+          <div class="sub-tabs">
+            <button class="sub-tab-btn active" data-ing-tab="quality" onclick="switchIngestionSubTab('quality')">
+              1. Quality Gate Decisions (Accepted vs. Rejected)
+            </button>
+            <button class="sub-tab-btn" data-ing-tab="markdown" onclick="switchIngestionSubTab('markdown')">
+              2. Claude Vision Extracted Markdown
+            </button>
+            <button class="sub-tab-btn" data-ing-tab="vectors" onclick="switchIngestionSubTab('vectors')">
+              3. Voyage-Context-3 Vector Embeddings (1024-Dim)
+            </button>
           </div>
-          <div id="report-template-name" style="font-weight:800; font-size:1rem; color:var(--accent-cyan);"></div>
-          <p style="font-size:0.78rem; color:var(--text-secondary);">
-            Each section below executes its own independent semantic search against MongoDB <code>chunks</code> before LLM synthesis:
-          </p>
-          <div id="report-sections-list" class="doc-list-container" style="max-height:430px;">
-            <!-- Populated from report_templates -->
+
+          <!-- Sub-Tab Content Area -->
+          <div id="ing-tab-quality" class="ing-subpanel">
+            <div id="ingestion-quality-content" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <!-- Populated dynamically -->
+            </div>
           </div>
-        </div>
 
-        <!-- Right: Embedded Live PDF Viewer -->
-        <div>
-          <div class="panel-heading" style="margin-bottom:0.6rem;">
-            <span><i class="fa-solid fa-eye" style="color:var(--accent-purple);"></i> Live Generated Executive PDF Preview</span>
-            <span id="pdf-preview-label" class="uc-badge">fsi / credit_rating</span>
+          <div id="ing-tab-markdown" class="ing-subpanel" style="display:none;">
+            <div class="answer-surface">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <strong style="font-size:0.92rem;">Extracted Structured Markdown &amp; Visual Table Descriptions</strong>
+                <span class="badge badge-info">Claude Sonnet Vision</span>
+              </div>
+              <pre id="ingestion-markdown-preview" style="font-family:var(--font-mono); font-size:0.82rem; white-space:pre-wrap; color:var(--color-text-secondary); line-height:1.65;"></pre>
+            </div>
           </div>
-          <div class="pdf-frame-wrapper">
-            <iframe id="pdf-preview-iframe" src="/api/reports/seed/fsi/credit_rating/preview" title="Executive PDF Report Preview"></iframe>
+
+          <div id="ing-tab-vectors" class="ing-subpanel" style="display:none;">
+            <div class="answer-surface">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div>
+                  <strong style="font-size:0.92rem;">1024-Dimensional Contextual Vector Representation</strong>
+                  <div style="font-size:0.8rem; color:var(--color-text-secondary);">Stored in <code>document_intelligence.chunks</code> indexed by <code>document_intelligence_chunks_vector_index</code></div>
+                </div>
+                <span class="badge badge-success">voyage-context-3</span>
+              </div>
+              <div id="ingestion-vector-bars" style="display:flex; align-items:flex-end; gap:4px; height:72px; padding:12px; background:var(--color-bg-subtle); border-radius:var(--radius-md); margin:14px 0;"></div>
+              <div id="ingestion-vector-floats" style="font-family:var(--font-mono); font-size:0.78rem; color:var(--color-primary);"></div>
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- ===================================================================
-         STEP 06: LIVE MONGODB ATLAS 12-COLLECTION & VECTOR INSPECTOR
-         =================================================================== -->
-    <section id="step-6-mongodb" class="workflow-section">
-      <div class="section-header">
-        <div>
-          <span class="section-step-tag"><i class="fa-solid fa-database"></i> STEP 06 OF 06 • UNIFIED DATA PLATFORM INSPECTOR</span>
-          <h2 class="section-title">6. Live MongoDB Collection &amp; Document Explorer</h2>
-          <p class="section-subtitle">
-            Click any of the <strong>12 live MongoDB collections</strong> below to inspect the exact BSON/JSON documents stored inside <code>mongodb://localhost:27017/document_intelligence</code> right now—including 1024-dim embeddings in <code>chunks</code>, LangGraph memory in <code>checkpoints_aio</code>, and RAG chunk scores in <code>gradings</code>.
-          </p>
-        </div>
-        <button class="btn-secondary" onclick="loadPlatformOverview()">
-          <i class="fa-solid fa-arrows-rotate"></i> Refresh Live Counts
-        </button>
-      </div>
+          <div class="next-step-footer">
+            <div>
+              <div style="font-weight:600; font-size:0.95rem;">Documents are evaluated, extracted, and embedded in MongoDB!</div>
+              <div style="font-size:0.83rem; color:var(--color-text-secondary);">Now query your embedded chunks using the Self-Correcting Agentic RAG Q&amp;A Assistant.</div>
+            </div>
+            <button class="btn btn-primary" onclick="switchView('qa')">
+              <span>Go to Step 3: Agentic Q&amp;A Assistant</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </section>
 
-      <!-- 12 Collection Pills -->
-      <div id="mongo-collections-grid" class="collection-pills-grid">
-        <!-- Populated from /api/platform/overview -->
-      </div>
+        <!-- =================================================================
+             VIEW 3: PILLAR 2 — SELF-CORRECTING AGENTIC RAG Q&A
+             ================================================================= -->
+        <section id="view-qa" class="app-view">
+          <div class="page-header">
+            <div>
+              <div class="page-eyebrow">STEP 3 OF 4 • ARCHITECTURAL PILLAR 2</div>
+              <h1 class="page-title">Agentic RAG Q&amp;A Assistant</h1>
+              <p class="page-description">
+                Ask domain questions against your ingested documents. The agent retrieves candidate vector chunks, grades each chunk for relevance (<code>YES</code> / <code>NO</code>), rewrites queries if needed, and persists thread memory in <code>checkpoints_aio</code>.
+              </p>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-secondary" onclick="startNewQASession()">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>New Session Thread</span>
+              </button>
+              <button class="btn btn-secondary" onclick="openReasoningDrawer()">
+                <i class="fa-solid fa-sliders"></i>
+                <span>Inspect Agent Reasoning &amp; Chunk Grades</span>
+              </button>
+            </div>
+          </div>
 
-      <!-- Selected Collection JSON Viewer -->
-      <div class="result-panel">
-        <div class="panel-heading">
-          <span id="inspector-collection-title"><i class="fa-solid fa-code" style="color:var(--mongo-green);"></i> Collection: chunks</span>
-          <span id="inspector-collection-desc" style="font-size:0.76rem; color:var(--text-secondary);"></span>
-        </div>
-        <pre id="mongo-json-inspector" class="json-viewer-pre">Loading live MongoDB documents...</pre>
+          <!-- Active Persona Context Strip -->
+          <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div class="brand-mark" style="width:40px; height:40px;">
+                <i class="fa-solid fa-user-shield"></i>
+              </div>
+              <div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <strong id="qa-active-persona-title" style="font-size:0.96rem;">Credit Rating Analyst</strong>
+                  <span class="badge badge-success">MongoDB Persona Active</span>
+                </div>
+                <div id="qa-active-persona-desc" style="font-size:0.82rem; color:var(--color-text-secondary); margin-top:2px;">
+                  Specializing in corporate credit scoring, leverage ratios, and rating sensitivities.
+                </div>
+              </div>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:0.76rem; color:var(--color-text-muted);">
+              Thread: <strong id="qa-active-thread-id" style="color:var(--color-text);">session-credit_rating-001</strong>
+            </div>
+          </div>
+
+          <!-- Suggested Prompts -->
+          <div style="margin-bottom:8px; font-size:0.78rem; font-weight:600; color:var(--color-text-muted);">
+            SUGGESTED QUESTIONS FOR THIS DOMAIN (CLICK TO ASK):
+          </div>
+          <div id="qa-prompt-pills" class="prompt-pills">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Clean Composer -->
+          <div class="chat-composer">
+            <i class="fa-solid fa-sparkles" style="color:var(--color-primary); margin-left:8px;"></i>
+            <input
+              type="text"
+              id="qa-input-box"
+              placeholder="Ask a question about the documents in this domain..."
+              onkeydown="if(event.key==='Enter') runAgenticQA()"
+            />
+            <button class="btn btn-primary" id="btn-submit-qa" onclick="runAgenticQA()">
+              <span>Ask Agent</span>
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+
+          <!-- Answer Display Card -->
+          <div class="answer-surface">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:14px; margin-bottom:16px; border-bottom:1px solid var(--color-border); flex-wrap:wrap; gap:10px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span class="badge badge-success" id="qa-status-badge">Grounded Response</span>
+                <span id="qa-sources-summary" style="font-size:0.82rem; color:var(--color-text-secondary);">Verified against MongoDB vector chunks</span>
+              </div>
+              <button class="btn btn-ghost" onclick="openReasoningDrawer()" style="font-size:0.8rem; color:var(--color-primary);">
+                <i class="fa-solid fa-magnifying-glass-chart"></i>
+                <span>View 5-Step Trace &amp; Grader Scores →</span>
+              </button>
+            </div>
+
+            <div id="qa-answer-markdown" style="white-space:pre-wrap; font-size:0.93rem; line-height:1.7; color:var(--color-text);"></div>
+
+            <!-- Verified Source Citations Strip -->
+            <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--color-border);">
+              <div style="font-size:0.76rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--color-text-muted); margin-bottom:10px;">
+                Verified Source Citations (`chunks` collection)
+              </div>
+              <div id="qa-citation-cards" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:10px;"></div>
+            </div>
+          </div>
+
+          <div class="next-step-footer">
+            <div>
+              <div style="font-weight:600; font-size:0.95rem;">Want a formatted multi-page PDF executive briefing?</div>
+              <div style="font-size:0.83rem; color:var(--color-text-secondary);">Step 4 compiles section-specific semantic searches into a downloadable PDF report.</div>
+            </div>
+            <button class="btn btn-primary" onclick="switchView('reports')">
+              <span>Go to Step 4: Executive PDF Reports</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             VIEW 4: PILLAR 3 — EXECUTIVE PDF REPORT STUDIO
+             ================================================================= -->
+        <section id="view-reports" class="app-view">
+          <div class="page-header">
+            <div>
+              <div class="page-eyebrow">STEP 4 OF 4 • ARCHITECTURAL PILLAR 3</div>
+              <h1 class="page-title">Executive PDF Report Studio</h1>
+              <p class="page-description">
+                Each domain has a structured template in MongoDB's <code>report_templates</code> collection. The report engine runs targeted semantic vector searches per section and renders a polished executive PDF using <code>ReportLab</code>.
+              </p>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-secondary" onclick="openTemplateSchemaDrawer()">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Inspect Template Prompts</span>
+              </button>
+              <a id="report-download-btn" href="/api/reports/seed/fsi/credit_rating/download" target="_blank" class="btn btn-primary">
+                <i class="fa-solid fa-download"></i>
+                <span>Download Executive PDF</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Clean Embedded PDF Reader -->
+          <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); overflow:hidden;">
+            <div style="padding:12px 20px; border-bottom:1px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fa-regular fa-file-pdf" style="color:var(--color-danger);"></i>
+                <strong id="report-viewer-title" style="font-size:0.9rem;">Executive Report Preview — Credit Rating</strong>
+              </div>
+              <a id="report-newtab-link" href="/api/reports/seed/fsi/credit_rating/preview" target="_blank" style="font-size:0.8rem; color:var(--color-primary); font-weight:600;">
+                Open Fullscreen PDF <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </a>
+            </div>
+            <div style="height:600px; background:#070a10;">
+              <iframe id="report-pdf-iframe" src="/api/reports/seed/fsi/credit_rating/preview" style="width:100%; height:100%; border:none;" title="Executive PDF Preview"></iframe>
+            </div>
+          </div>
+
+          <div class="next-step-footer">
+            <div>
+              <div style="font-weight:600; font-size:0.95rem;">Curious how all 13 MongoDB collections store these workflows under the hood?</div>
+              <div style="font-size:0.83rem; color:var(--color-text-secondary);">Open the MongoDB Explorer to browse live records, assessments, checkpoints, and 1024-dim vectors.</div>
+            </div>
+            <button class="btn btn-primary" onclick="switchView('database')">
+              <span>Explore MongoDB Collections</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             VIEW 5: MONGODB ATLAS 13-COLLECTION EXPLORER
+             ================================================================= -->
+        <section id="view-database" class="app-view">
+          <div class="page-header">
+            <div>
+              <div class="page-eyebrow">UNIFIED DATA PLATFORM BACKBONE</div>
+              <h1 class="page-title">Live MongoDB Collection Explorer</h1>
+              <p class="page-description">
+                Select any collection below to view its live records stored in <code>mongodb://localhost:27017/document_intelligence</code>. Click <strong>"Inspect Document"</strong> on any row to view its complete BSON/JSON payload and vector dimensions in the side panel.
+              </p>
+            </div>
+            <button class="btn btn-secondary" onclick="loadOverviewAndCollections()">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>Refresh Database Stats</span>
+            </button>
+          </div>
+
+          <!-- Collection Selector Strip -->
+          <div id="db-collection-selector" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Clean Structured Records Table (No intimidating raw JSON wall) -->
+          <div class="clean-table-wrapper">
+            <div style="padding:14px 18px; border-bottom:1px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <strong id="db-table-collection-name" style="font-size:0.95rem;">document_intelligence.chunks</strong>
+                <span id="db-table-collection-desc" style="font-size:0.82rem; color:var(--color-text-secondary); margin-left:10px;"></span>
+              </div>
+              <span class="badge badge-success" id="db-table-count-badge">Loading...</span>
+            </div>
+            <table class="clean-table">
+              <thead>
+                <tr>
+                  <th>Record ID</th>
+                  <th>Primary Identifier / Name</th>
+                  <th>Summary / Details</th>
+                  <th>Metadata / Status</th>
+                  <th style="text-align:right;">Inspect BSON</th>
+                </tr>
+              </thead>
+              <tbody id="db-records-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
       </div>
-    </section>
-  </main>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       SLIDE-OVER DETAIL DRAWER (Progressive Disclosure for Traces, Templates & BSON)
+       ======================================================================= -->
+  <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeSlideDrawer()"></div>
+  <aside class="slide-drawer" id="slide-drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <div>
+        <div id="drawer-eyebrow" style="font-family:var(--font-mono); font-size:0.72rem; color:var(--color-primary); text-transform:uppercase;">INSPECTOR</div>
+        <h3 id="drawer-title" style="font-size:1.1rem; font-weight:700;">Record Details</h3>
+      </div>
+      <button class="btn btn-ghost" onclick="closeSlideDrawer()">
+        <i class="fa-solid fa-xmark"></i>
+        <span>Close</span>
+      </button>
+    </div>
+    <div class="drawer-body" id="drawer-body-content">
+      <!-- Populated dynamically -->
+    </div>
+  </aside>
+
+  <!-- Toast Feedback Container -->
+  <div class="toast-stack" id="toast-stack"></div>
 
   <script src="/static/app.js"></script>
 </body>
