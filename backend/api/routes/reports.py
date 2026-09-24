@@ -47,6 +47,22 @@ class GenerateReportRequest(BaseModel):
     use_case: str = Field(..., description="Use case code (e.g., 'credit_rating', 'risk_assessment')")
 
 
+from pathlib import Path
+
+def _resolve_seed_report_path(industry: str, use_case: str) -> str:
+    """Resolve seed report PDF path across local dev (Windows/macOS/Linux) and Docker."""
+    filename = f"seed_{use_case}_report.pdf"
+    candidates = [
+        Path(__file__).resolve().parent.parent.parent / "data" / "seed" / "reports" / industry / use_case / filename,
+        Path(os.getenv("REPORT_STORAGE_PATH", "./data/seed/reports")) / industry / use_case / filename,
+        Path(f"/backend/data/seed/reports/{industry}/{use_case}/{filename}"),
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+    return str(candidates[0])
+
+
 @router.get("/list", response_model=List[ReportInfo])
 async def list_reports(
     industry: Optional[str] = None,
@@ -79,18 +95,21 @@ async def list_reports(
         # Convert to response model
         report_list = []
         for report in reports:
+            file_size_kb = report.get("file_size_kb")
+            if file_size_kb is None:
+                file_size_kb = round((report.get("file_size", 0) or 0) / 1024, 2)
             report_list.append(ReportInfo(
                 report_id=str(report["_id"]),
-                industry=report["industry"],
-                use_case=report["use_case"],
-                report_date=report["report_date"],
-                file_path=report["file_path"],
-                file_size=report["file_size"],
-                status=report["status"],
-                generated_at=report["generated_at"],
-                chunk_count=report["chunk_count"],
-                document_count=report["document_count"],
-                report_metadata=report["report_metadata"]
+                industry=report.get("industry", "fsi"),
+                use_case=report.get("use_case", "credit_rating"),
+                report_date=report.get("report_date") or datetime.now(timezone.utc),
+                file_path=report.get("file_path", ""),
+                file_size_kb=float(file_size_kb),
+                total_pages=int(report.get("total_pages", 4)),
+                status=report.get("status", "generated"),
+                generated_at=report.get("generated_at") or datetime.now(timezone.utc),
+                chunk_count=int(report.get("chunk_count", 0)),
+                document_count=int(report.get("document_count", 0))
             ))
         
         logger.info(f"Retrieved {len(report_list)} reports")
@@ -135,7 +154,7 @@ async def download_report(
             # File doesn't exist (container restart scenario), try seed report fallback
             industry = report.get("industry")
             use_case = report.get("use_case")
-            seed_report_path = f"/backend/data/seed/reports/{industry}/{use_case}/seed_{use_case}_report.pdf"
+            seed_report_path = _resolve_seed_report_path(industry, use_case)
             
             if os.path.exists(seed_report_path):
                 logger.info(f"Using seed report fallback for download: {seed_report_path}")
@@ -153,7 +172,8 @@ async def download_report(
                 "Content-Disposition": f"attachment; filename={filename}"
             }
         )
-        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error downloading report: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -172,7 +192,7 @@ async def download_seed_report(
     - use_case: Use case code (e.g., 'credit_rating', 'risk_assessment')
     """
     try:
-        seed_report_path = f"/backend/data/seed/reports/{industry}/{use_case}/seed_{use_case}_report.pdf"
+        seed_report_path = _resolve_seed_report_path(industry, use_case)
         
         if not os.path.exists(seed_report_path):
             raise HTTPException(status_code=404, detail="Seed report not found")
@@ -187,7 +207,8 @@ async def download_seed_report(
                 "Content-Disposition": f"attachment; filename={filename}"
             }
         )
-        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error downloading seed report: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -206,7 +227,7 @@ async def preview_seed_report(
     - use_case: Use case code (e.g., 'credit_rating', 'risk_assessment')
     """
     try:
-        seed_report_path = f"/backend/data/seed/reports/{industry}/{use_case}/seed_{use_case}_report.pdf"
+        seed_report_path = _resolve_seed_report_path(industry, use_case)
         
         if not os.path.exists(seed_report_path):
             raise HTTPException(status_code=404, detail="Seed report not found")
@@ -224,7 +245,8 @@ async def preview_seed_report(
                 "Content-Type": "application/pdf"
             }
         )
-        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error previewing seed report: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -257,7 +279,7 @@ async def preview_report(
             # File doesn't exist (container restart scenario), try seed report fallback
             industry = report.get("industry")
             use_case = report.get("use_case")
-            seed_report_path = f"/backend/data/seed/reports/{industry}/{use_case}/seed_{use_case}_report.pdf"
+            seed_report_path = _resolve_seed_report_path(industry, use_case)
             
             if os.path.exists(seed_report_path):
                 logger.info(f"Using seed report fallback for preview: {seed_report_path}")
@@ -278,7 +300,8 @@ async def preview_report(
                 "Content-Type": "application/pdf"
             }
         )
-        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error previewing report: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -458,7 +481,7 @@ async def get_latest_report(
                 logger.warning(f"Report file not found on filesystem: {file_path}, falling back to seed report")
         
         # Fallback to seed report
-        seed_report_path = f"/backend/data/seed/reports/{industry}/{use_case}/seed_{use_case}_report.pdf"
+        seed_report_path = _resolve_seed_report_path(industry, use_case)
         if os.path.exists(seed_report_path):
             # Get file size
             file_size = os.path.getsize(seed_report_path)
@@ -562,7 +585,7 @@ async def cleanup_orphaned_reports(
                 # Check if seed report exists as fallback
                 industry = report.get("industry")
                 use_case = report.get("use_case")
-                seed_report_path = f"/backend/data/seed/reports/{industry}/{use_case}/seed_{use_case}_report.pdf"
+                seed_report_path = _resolve_seed_report_path(industry, use_case)
                 
                 if not os.path.exists(seed_report_path):
                     # No fallback available, mark as orphaned
