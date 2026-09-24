@@ -1,5 +1,7 @@
 """
-Supervisor Agent - Orchestrates the document intelligence workflow
+Supervisor Agent — Central LangGraph State Coordinator.
+Orchestrates multi-agent document intelligence ingestion across Scanner, Evaluator,
+Claude Vision Extractor, and VoyageAI Context-3 Processor worker nodes.
 """
 
 import logging
