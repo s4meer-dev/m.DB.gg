@@ -1,3 +1,9 @@
+"""
+FSI Document Intelligence API Entrypoint
+Registers Agentic RAG Q&A, Supervisor Multi-Agent Ingestion, Document Management,
+Scheduled Reporting, and Interactive Platform routers alongside static frontend assets.
+"""
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import APIRouter
