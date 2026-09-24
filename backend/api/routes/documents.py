@@ -69,10 +69,12 @@ async def document_exists(
         })
 
         ready = chunks_count > 0 or has_completed_doc
+        exists_flag = (chunks_count + documents_count + assessments_count) > 0
 
         return {
             "document_name": document_name,
-            "exists_in_db": (chunks_count + documents_count + assessments_count) > 0,
+            "exists": exists_flag,
+            "exists_in_db": exists_flag,
             "chunks": chunks_count,
             "documents": documents_count,
             "assessments": assessments_count,
