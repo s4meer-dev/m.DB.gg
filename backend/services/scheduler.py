@@ -1,6 +1,7 @@
 """
-Scheduler Service for Daily Report Generation
-Schedules and manages daily report generation for all industry/use case combinations
+Scheduler Service for Automated Executive Report Generation & State Maintenance.
+Schedules and manages report generation for all industry/use case combinations
+and validates baseline seed document state across local and container environments.
 """
 
 import os
