@@ -62,8 +62,12 @@ A MongoDB Atlas-powered intelligent document processing system that demonstrates
 4. **Run the Application**:
 
    ```bash
-   # From project root
+   # Option A: Using Docker Compose (from project root)
    docker-compose up --build
+
+   # Option B: Local Python / Uvicorn (serves both Interactive UI & API at http://localhost:8080)
+   cd backend
+   uv run uvicorn main:app --host 0.0.0.0 --port 8080
    ```
 
 5. **Create Vector Search Index** (Required for Q&A functionality):
