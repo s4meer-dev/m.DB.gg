@@ -1,6 +1,7 @@
 """
-Agentic RAG Q&A System
-Implements LangGraph-based agentic retrieval-augmented generation with self-correction
+Agentic RAG Q&A System with Self-Correction.
+Implements LangGraph retrieval-augmented generation with binary document relevance grading,
+automatic query rewriting, domain-specific agent personas, and MongoDB checkpoint persistence.
 """
 
 import logging
