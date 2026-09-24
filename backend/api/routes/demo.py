@@ -1,8 +1,8 @@
 """
-Interactive Platform & Local MongoDB Execution Engine
-Provides unified endpoints for the Interactive Frontend to explore all 12 MongoDB collections,
+Interactive Platform & Local MongoDB Execution Engine.
+Provides unified endpoints for the Interactive Frontend to explore all 13 MongoDB collections,
 run visual Multi-Agent Supervisor Ingestion traces, execute Self-Correcting Agentic RAG Q&A
-against MongoDB chunks, and inspect Report Templates & Vector Embeddings.
+against MongoDB chunks, and inspect Executive Report Templates & Vector Embeddings.
 """
 
 import os
