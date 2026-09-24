@@ -39,8 +39,14 @@ class Industry(str, Enum):
     INSURANCE = "insurance"
 
 
-# Get configuration from environment
-DOCUMENT_STORAGE_PATH = os.getenv("DOCUMENT_STORAGE_PATH", "/docs")
+# Get configuration from environment with automatic local seed path fallback
+_env_doc_storage = os.getenv("DOCUMENT_STORAGE_PATH", "/docs")
+if not Path(_env_doc_storage).exists():
+    _fallback_seed_docs = Path(__file__).resolve().parent.parent.parent / "data" / "seed" / "docs"
+    DOCUMENT_STORAGE_PATH = str(_fallback_seed_docs) if _fallback_seed_docs.exists() else _env_doc_storage
+else:
+    DOCUMENT_STORAGE_PATH = _env_doc_storage
+
 ALLOWED_INDUSTRIES = os.getenv("ALLOWED_INDUSTRIES", "fsi,manufacturing,retail,healthcare,media,insurance").split(",")
 DEFAULT_INDUSTRY = os.getenv("DEFAULT_INDUSTRY", "fsi")
 MAX_UPLOAD_SIZE_MB = float(os.getenv("MAX_UPLOAD_SIZE_MB", "1"))
@@ -376,9 +382,9 @@ async def get_storage_info() -> Dict[str, Any]:
     storage_path = Path(DOCUMENT_STORAGE_PATH)
     
     if storage_path.exists():
-        stat = os.statvfs(storage_path)
-        free_space_mb = (stat.f_bavail * stat.f_frsize) / (1024 * 1024)
-        total_space_mb = (stat.f_blocks * stat.f_frsize) / (1024 * 1024)
+        usage = shutil.disk_usage(storage_path)
+        free_space_mb = usage.free / (1024 * 1024)
+        total_space_mb = usage.total / (1024 * 1024)
     else:
         free_space_mb = 0
         total_space_mb = 0
