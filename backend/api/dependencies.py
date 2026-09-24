@@ -1,5 +1,7 @@
 """
-FastAPI dependency injection for shared resources
+FastAPI dependency injection for shared resources.
+Maintains process-wide singletons for MongoClient, AsyncMongoClient, MongoDBConnector,
+VoyageContext3Embeddings, BedrockClient, and LangGraph AsyncMongoDBSaver checkpointers.
 """
 
 import os
