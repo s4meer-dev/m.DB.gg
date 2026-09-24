@@ -1,6 +1,7 @@
 """
-MongoDB Vector Search with HNSW
-Showcases MongoDB's vector search capabilities with voyage-context-3 embeddings
+MongoDB Vector Search with HNSW (Hierarchical Navigable Small World).
+Implements 1024-dimensional cosine similarity search over voyage-context-3 embeddings
+with metadata pre-filtering by document_id, industry, and use_case.
 """
 
 import logging
