@@ -1,6 +1,7 @@
 """
-MongoDB connector for document chunks and vector search
-Supports document processing with visual reference tracking
+MongoDB connector for document chunks, operational metadata, and vector search.
+Supports unified storage across 13 collections for Supervisor Multi-Agent Ingestion,
+Self-Correcting Agentic RAG Q&A, LangGraph checkpointing, and Executive PDF Reporting.
 """
 
 import os
