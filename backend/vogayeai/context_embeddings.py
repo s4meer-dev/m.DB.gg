@@ -1,5 +1,5 @@
 """
-VoyageAI Context-3 Embeddings Module
+VoyageAI Context-3 Embeddings Module (1024-Dimensional Vector Representation).
 This module showcases the power of voyage-context-3 for context-aware document embeddings.
 The key differentiator: chunks understand the FULL document context!
 
