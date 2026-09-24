@@ -159,7 +159,6 @@ class DocumentInfo(BaseModel):
 _agentic_rag_agent: Optional[AgenticRAGQandA] = None
 
 
-@staticmethod
 async def generate_session_id():
     """Generate a unique session_id based on current timestamp"""
     return f"session_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
