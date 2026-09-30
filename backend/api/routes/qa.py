@@ -267,7 +267,7 @@ async def get_available_documents(
                     "document_name": {"$first": "$document_name"},
                     "processed_at": {"$first": "$metadata.processed_at"},
                     "chunk_count": {"$sum": 1},
-                    "has_visual_references": {"$anyElementTrue": ["$has_visual_references"]}
+                    "has_visual_references": {"$max": "$has_visual_references"}
                 }
             },
             {
@@ -279,14 +279,22 @@ async def get_available_documents(
         
         documents = []
         for doc in cursor:
-            # Extract file extension from document name
-            file_extension = doc["document_name"].split(".")[-1].upper() if "." in doc["document_name"] else "UNKNOWN"
+            doc_name = doc.get("document_name") or "Unknown Document"
+            file_extension = doc_name.split(".")[-1].upper() if "." in doc_name else "UNKNOWN"
+            
+            pa = doc.get("processed_at")
+            if pa and hasattr(pa, "strftime"):
+                upload_date = pa.strftime("%Y-%m-%d")
+            elif pa and isinstance(pa, str):
+                upload_date = pa[:10]
+            else:
+                upload_date = "Unknown"
             
             documents.append(DocumentInfo(
-                document_id=doc["_id"],
-                document_name=doc["document_name"],
+                document_id=str(doc.get("_id", "")),
+                document_name=doc_name,
                 document_type=file_extension,
-                upload_date=doc["processed_at"].strftime("%Y-%m-%d") if doc["processed_at"] else "Unknown",
+                upload_date=upload_date,
                 file_size=0  # Not available in chunks, could be calculated if needed
             ))
         
