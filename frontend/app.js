@@ -93,6 +93,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+  switchView("overview");
   await loadOverviewAndCollections();
   await changeActiveDomain("credit_rating", false);
   await fetchVaultFiles();
@@ -125,6 +126,21 @@ function switchView(viewName) {
   const nextBtn = document.getElementById("topbar-next-step-btn");
   if (nextBtn) {
     nextBtn.innerHTML = `<span>${cfg.nextLabel}</span><i class="fa-solid fa-arrow-right"></i>`;
+  }
+
+  // Synchronize Global Workflow Bar pills
+  const stepMapping = {
+    overview: "flow-step-overview",
+    vault: "flow-step-vault",
+    ingestion: "flow-step-ingestion",
+    qa: "flow-step-qa",
+    reports: "flow-step-reports"
+  };
+  document.querySelectorAll(".workflow-step-pill").forEach((pill) => pill.classList.remove("active"));
+  const activePillId = stepMapping[viewName];
+  if (activePillId) {
+    const activePill = document.getElementById(activePillId);
+    if (activePill) activePill.classList.add("active");
   }
 
   // Close mobile sidebar if open
@@ -163,6 +179,155 @@ function showToast(message) {
     toast.style.transition = "opacity 200ms ease";
     setTimeout(() => toast.remove(), 220);
   }, 3200);
+}
+
+/* ============================================================================
+   SYSTEM ARCHITECTURE MODAL
+   ============================================================================ */
+
+function openArchitectureModal() {
+  const modal = document.getElementById("architecture-modal-backdrop");
+  if (modal) modal.classList.add("open");
+}
+
+function closeArchitectureModal() {
+  const modal = document.getElementById("architecture-modal-backdrop");
+  if (modal) modal.classList.remove("open");
+}
+
+/* ============================================================================
+   INTERACTIVE GUIDED TOUR CONTROLLER
+   ============================================================================ */
+
+let currentTourStep = 0;
+const TOUR_STEPS = [
+  {
+    view: "overview",
+    badge: "Step 0 of 5",
+    title: "Project Overview & Domains",
+    text: "Welcome to FSI Document Intelligence! This platform turns complex financial documents (credit ratings, KYC filings, loan files) into verified AI answers and executive PDF reports with zero hallucination.",
+    highlight: "workflow-overview-grid"
+  },
+  {
+    view: "vault",
+    badge: "Step 1 of 5",
+    title: "1. Document Vault",
+    text: "Documents are scanned from local storage, AWS S3, or Google Drive. Each file is verified with SHA-256 deduplication and categorized by domain (e.g. Credit Rating, Loan Origination).",
+    highlight: "vault-files-table"
+  },
+  {
+    view: "ingestion",
+    badge: "Step 2 of 5",
+    title: "2. Multi-Agent Ingestion Pipeline",
+    text: "A LangGraph Supervisor orchestrates 4 specialized agents: Scanner discovers files, Quality Gatekeeper validates financial relevance, Claude 3.5 Sonnet extracts tables cleanly via Vision, and VoyageAI computes 1024-dim embeddings saved directly to MongoDB Atlas.",
+    highlight: "ingestion-action-card"
+  },
+  {
+    view: "qa",
+    badge: "Step 3 of 5",
+    title: "3. Agentic RAG Q&A Assistant",
+    text: "Ask questions about any ingested document. Our agent performs self-correcting RAG: it retrieves vector chunks, grades relevance, and automatically rewrites the query if needed, outputting answers with exact file citations.",
+    highlight: "qa-input-form",
+    onEnter: () => {
+      const input = document.getElementById("qa-query-input");
+      if (input && !input.value.trim()) {
+        const questions = DOMAIN_QUESTIONS[activeUseCase] || DOMAIN_QUESTIONS.credit_rating;
+        input.value = questions[0];
+      }
+    }
+  },
+  {
+    view: "reports",
+    badge: "Step 4 of 5",
+    title: "4. Executive PDF Reports",
+    text: "One-click generation of professional multi-page PDF briefing reports. MongoDB stores structured report templates, and ReportLab compiles them with vector-retrieved citations and financial metrics.",
+    highlight: "reports-table"
+  },
+  {
+    view: "database",
+    badge: "Step 5 of 5",
+    title: "5. MongoDB Atlas Single Source of Truth",
+    text: "Explore all 13 collections directly: documents, chunks (vectors), evaluation_logs, checkpoints_aio, and report_templates. Everything lives in MongoDB—no external vector database needed!",
+    highlight: "db-collections-pills"
+  }
+];
+
+function startGuidedDemo() {
+  currentTourStep = 0;
+  const container = document.getElementById("tour-guide-container");
+  if (container) {
+    container.style.display = "block";
+  }
+  renderTourStep();
+}
+
+function stopGuidedTour() {
+  const container = document.getElementById("tour-guide-container");
+  if (container) {
+    container.style.display = "none";
+    container.innerHTML = "";
+  }
+  showToast("Tour closed. Feel free to explore freely!");
+}
+
+function nextTourStep() {
+  if (currentTourStep < TOUR_STEPS.length - 1) {
+    currentTourStep++;
+    renderTourStep();
+  } else {
+    stopGuidedTour();
+    showToast("Tour finished! You're ready to use FSI Document Intelligence.");
+  }
+}
+
+function prevTourStep() {
+  if (currentTourStep > 0) {
+    currentTourStep--;
+    renderTourStep();
+  }
+}
+
+function renderTourStep() {
+  const step = TOUR_STEPS[currentTourStep];
+  if (!step) return;
+
+  switchView(step.view);
+
+  if (typeof step.onEnter === "function") {
+    step.onEnter();
+  }
+
+  const container = document.getElementById("tour-guide-container");
+  if (!container) return;
+
+  const isLast = currentTourStep === TOUR_STEPS.length - 1;
+  const isFirst = currentTourStep === 0;
+
+  container.innerHTML = `
+    <div class="tour-guide-card">
+      <div class="tour-guide-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="badge badge-primary" style="font-size:0.75rem;">${step.badge}</span>
+          <strong style="font-size:0.92rem; color:var(--color-text);">${step.title}</strong>
+        </div>
+        <button class="btn btn-ghost" onclick="stopGuidedTour()" title="Exit Tour" style="padding:4px 8px;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="tour-guide-body">
+        <p>${step.text}</p>
+      </div>
+      <div class="tour-guide-footer">
+        <button class="btn btn-ghost" onclick="prevTourStep()" ${isFirst ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ""}>
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </button>
+        <button class="btn btn-primary" onclick="nextTourStep()">
+          <span>${isLast ? "Finish Tour" : "Next Step"}</span>
+          <i class="fa-solid ${isLast ? "fa-circle-check" : "fa-arrow-right"}"></i>
+        </button>
+      </div>
+    </div>
+  `;
 }
 
 /* ============================================================================
