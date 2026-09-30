@@ -88,34 +88,32 @@ async def document_exists(
 
 @router.get("/list", response_model=DocumentListResponse)
 async def list_documents(
-    use_case: str = Query(..., description="Use case filter (credit_rating, payment_processing_exception, investment_research, kyc_onboarding, loan_origination)"),
-    sources: List[str] = Query(..., description="Sources filter (array of: @local, @s3, @gdrive)"),
+    use_case: Optional[str] = Query(None, description="Use case filter (credit_rating, payment_processing_exception, investment_research, kyc_onboarding, loan_origination)"),
+    sources: Optional[List[str]] = Query(None, description="Sources filter (array of: @local, @s3, @gdrive)"),
     status: Optional[str] = Query("completed", description="Filter by status (completed, processing, failed)"),
     limit: int = Query(100, description="Maximum number of documents to return"),
     skip: int = Query(0, description="Number of documents to skip"),
     mongodb_connector: MongoDBConnector = Depends(get_mongodb_connector)
 ):
     """
-    List all documents with metadata, filtered by use case and sources.
+    List all documents with metadata, filtered optionally by use case and sources.
     
     Returns document information for selection in Q&A interface.
     """
     try:
         logger.info(f"Listing documents with use_case={use_case}, sources={sources}, status={status}, limit={limit}, skip={skip}")
         
-        # Validate use_case
+        # Validate use_case if provided
         valid_use_cases = ["credit_rating", "payment_processing_exception", "investment_research", "kyc_onboarding", "loan_origination"]
-        if use_case not in valid_use_cases:
+        if use_case and use_case not in valid_use_cases:
             raise HTTPException(status_code=400, detail=f"Invalid use_case. Must be one of: {valid_use_cases}")
         
-        # Validate sources
+        # Validate sources if provided
         valid_sources = ["@local", "@s3", "@gdrive"]
-        for source in sources:
-            if source not in valid_sources:
-                raise HTTPException(status_code=400, detail=f"Invalid source: {source}. Must be one of: {valid_sources}")
-        
-        if not sources:
-            raise HTTPException(status_code=400, detail="At least one source must be selected")
+        if sources:
+            for source in sources:
+                if source not in valid_sources:
+                    raise HTTPException(status_code=400, detail=f"Invalid source: {source}. Must be one of: {valid_sources}")
         
         # Get documents based on filter
         if status:
@@ -126,25 +124,24 @@ async def list_documents(
         # Filter by use_case and sources
         filtered_docs = []
         for doc in documents:
-            source_path = doc.get("source_path", "")
+            source_path = doc.get("source_path", "").replace("\\", "/")
             
-            # Extract use case from source_path (last part after /)
-            path_parts = source_path.split("/")
+            # Extract use case from source_path
+            path_parts = [p for p in source_path.split("/") if p]
             doc_use_case = path_parts[-1] if path_parts else ""
             
             # Extract source type from source_path (e.g., @local from @local@/docs/...)
             if source_path.startswith("@"):
-                # Find the second @ to extract the source type
                 second_at = source_path.find("@", 1)
-                if second_at != -1:
-                    source_type = source_path[:second_at]  # Don't include the second @
-                else:
-                    source_type = ""
+                source_type = source_path[:second_at] if second_at != -1 else ""
             else:
-                source_type = ""
+                source_type = doc.get("source_type", "")
             
             # Check if document matches filters
-            if doc_use_case == use_case and source_type in sources:
+            matches_use_case = (use_case is None) or (doc_use_case == use_case) or (doc.get("use_case") == use_case)
+            matches_source = (sources is None) or (source_type in sources)
+            
+            if matches_use_case and matches_source:
                 filtered_docs.append(doc)
         
         # Apply pagination
@@ -289,10 +286,15 @@ async def get_raw_chunk(
         from bson.objectid import ObjectId
         logger.info(f"Getting raw chunk for {chunk_id}")
         
-        # Get raw chunk from MongoDB
-        raw_chunk = mongodb_connector.collection.find_one({
-            "_id": ObjectId(chunk_id)
-        })
+        # Get raw chunk from MongoDB (support ObjectId or custom chunk_id string)
+        query = {"chunk_id": chunk_id}
+        try:
+            chunk_obj_id = ObjectId(chunk_id)
+            query = {"$or": [{"_id": chunk_obj_id}, {"chunk_id": chunk_id}]}
+        except Exception:
+            pass
+            
+        raw_chunk = mongodb_connector.collection.find_one(query)
         
         if not raw_chunk:
             raise HTTPException(status_code=404, detail=f"Chunk {chunk_id} not found")
