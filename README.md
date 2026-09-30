@@ -70,6 +70,12 @@ A MongoDB Atlas-powered intelligent document processing system that demonstrates
    uv run uvicorn main:app --host 0.0.0.0 --port 8080
    ```
 
+   Once running, open **`http://localhost:8080`** in your browser to access the **Interactive Web UI**:
+   - **Step-by-Step Visual Pipeline**: Track documents through `1. Document Vault` ➔ `2. Multi-Agent Ingestion` ➔ `3. Agentic Q&A` ➔ `4. Executive PDF Reports`.
+   - **1-Click Guided Demo Tour**: Click the guided tour button to walk through the end-to-end architecture with real-time highlights.
+   - **Interactive Architecture Modal**: Deep dive into the 3 architectural pillars and compare MongoDB Atlas unified storage vs fragmented AI stacks.
+   - **API Documentation**: Interactive Swagger docs available at **`http://localhost:8080/docs`**.
+
 5. **Create Vector Search Index** (Required for Q&A functionality):
    - Go to MongoDB Atlas → your cluster → Atlas Search
    - Create new index on `chunks` collection
