@@ -67,7 +67,7 @@ class S3BucketAccess:
         if (not force_refresh and 
             self._bucket_config_cache and 
             self._config_cache_time and
-            (datetime.now() - self._config_cache_time).seconds < self._cache_duration):
+            (datetime.now() - self._config_cache_time).total_seconds() < self._cache_duration):
             return self._bucket_config_cache
         
         if not self.mongodb_connector:

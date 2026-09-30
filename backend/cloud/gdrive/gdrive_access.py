@@ -66,7 +66,7 @@ class GoogleDriveAccess:
         if (not force_refresh and 
             self._gdrive_config_cache and 
             self._config_cache_time and
-            (datetime.now() - self._config_cache_time).seconds < self._cache_duration):
+            (datetime.now() - self._config_cache_time).total_seconds() < self._cache_duration):
             return self._gdrive_config_cache
         
         if not self.mongodb_connector:
