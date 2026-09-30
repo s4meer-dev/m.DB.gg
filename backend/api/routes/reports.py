@@ -142,8 +142,13 @@ async def download_report(
         from bson import ObjectId
         
         # Get report metadata
+        try:
+            report_obj_id = ObjectId(report_id)
+        except Exception:
+            raise HTTPException(status_code=404, detail="Invalid report ID format")
+            
         report = mongodb_connector.scheduled_reports_collection.find_one({
-            "_id": ObjectId(report_id)
+            "_id": report_obj_id
         })
         
         if not report:
@@ -267,8 +272,13 @@ async def preview_report(
         from bson import ObjectId
         
         # Get report metadata
+        try:
+            report_obj_id = ObjectId(report_id)
+        except Exception:
+            raise HTTPException(status_code=404, detail="Invalid report ID format")
+            
         report = mongodb_connector.scheduled_reports_collection.find_one({
-            "_id": ObjectId(report_id)
+            "_id": report_obj_id
         })
         
         if not report:
