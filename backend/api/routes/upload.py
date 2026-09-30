@@ -269,7 +269,7 @@ async def upload_and_process(
     # First upload the files
     upload_result = await upload_documents(files, industry, use_case)
     
-    if upload_result["status"] != "success" or not upload_result["files"]:
+    if upload_result.get("status") != "success" or not upload_result.get("files"):
         return {
             "status": "error",
             "message": "No files uploaded successfully",
@@ -277,7 +277,7 @@ async def upload_and_process(
         }
     
     # Start ingestion for the uploaded files
-    source_paths = [f["ingestion_path"] for f in upload_result["files"]]
+    source_paths = [f["ingestion_path"] for f in upload_result.get("files", [])]
     
     # Generate workflow ID with use_case if provided
     if use_case:

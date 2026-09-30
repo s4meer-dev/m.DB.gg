@@ -554,7 +554,8 @@ async def simulate_supervisor_ingestion(req: SimulateIngestionRequest):
 
 
 class InteractiveQARequest(BaseModel):
-    question: str
+    question: Optional[str] = None
+    query: Optional[str] = None
     use_case: str = "credit_rating"
     thread_id: str = "demo-session-001"
 
@@ -569,6 +570,7 @@ async def interactive_agentic_rag_qa(req: InteractiveQARequest):
     db = connector.database
     ensure_all_use_cases_have_rich_chunks(db)
 
+    question_text = req.question or req.query or "What is the key financial summary of this document?"
     uc = req.use_case if req.use_case in USE_CASE_METADATA else "credit_rating"
     persona = db.agent_personas.find_one({"use_case": uc}) or {}
     persona_name = persona.get("persona_name", USE_CASE_METADATA[uc]["short"] + " Specialist")
@@ -577,7 +579,7 @@ async def interactive_agentic_rag_qa(req: InteractiveQARequest):
     all_uc_chunks = list(db.chunks.find({"metadata.use_case": uc}))
     other_chunks = list(db.chunks.find({"metadata.use_case": {"$ne": uc}}).limit(6))
 
-    q_words = [w.lower() for w in req.question.replace("?", " ").replace(",", " ").split() if len(w) > 2]
+    q_words = [w.lower() for w in question_text.replace("?", " ").replace(",", " ").split() if len(w) > 2]
 
     scored_chunks = []
     for ch in all_uc_chunks + other_chunks:
@@ -598,7 +600,7 @@ async def interactive_agentic_rag_qa(req: InteractiveQARequest):
         grade = "yes" if (is_same_uc or sim_score >= 0.65) else "no"
         grading_record = {
             "session_id": req.thread_id,
-            "question": req.question,
+            "question": question_text,
             "document_id": ch.get("document_id"),
             "document_name": ch.get("document_name"),
             "chunk_index": ch.get("chunk_index", 0),
@@ -619,7 +621,7 @@ async def interactive_agentic_rag_qa(req: InteractiveQARequest):
         relevant_chunks = [graded_chunks[0]]
 
     # 3. Build self-correcting Agentic RAG reasoning trace and save to `logs_qa`
-    rewritten_query = f"[{USE_CASE_METADATA[uc]['short']} Context] {req.question} — metrics, risk factors, and visual tables"
+    rewritten_query = f"[{USE_CASE_METADATA[uc]['short']} Context] {question_text} — metrics, risk factors, and visual tables"
     agent_trace = [
         {
             "node": "load_persona",
@@ -656,7 +658,7 @@ async def interactive_agentic_rag_qa(req: InteractiveQARequest):
     db.logs_qa.insert_one({
         "session_id": req.thread_id,
         "use_case": uc,
-        "question": req.question,
+        "question": question_text,
         "trace": agent_trace,
         "timestamp": datetime.now(timezone.utc).isoformat()
     })
@@ -679,7 +681,7 @@ async def interactive_agentic_rag_qa(req: InteractiveQARequest):
 
     answer_markdown = (
         f"### {persona_name} — Grounded Analysis\n\n"
-        f"Based on the verified documents stored in MongoDB (`document_intelligence.chunks`) for **{USE_CASE_METADATA[uc]['title']}**, here are the key findings addressing **\"{req.question}\"**:\n\n"
+        f"Based on the verified documents stored in MongoDB (`document_intelligence.chunks`) for **{USE_CASE_METADATA[uc]['title']}**, here are the key findings addressing **\"{question_text}\"**:\n\n"
         + "\n\n---\n\n".join(evidence_blocks)
         + f"\n\n---\n**🧠 Memory & Verification**: State persisted to MongoDB `checkpoints_aio` under thread `{req.thread_id}` with **{len(citations)} verified document citations**."
     )
@@ -688,7 +690,7 @@ async def interactive_agentic_rag_qa(req: InteractiveQARequest):
         "thread_id": req.thread_id,
         "use_case": uc,
         "persona_name": persona_name,
-        "question": req.question,
+        "question": question_text,
         "rewritten_query": rewritten_query,
         "answer": answer_markdown,
         "citations": citations,

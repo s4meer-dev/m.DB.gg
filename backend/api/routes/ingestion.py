@@ -250,6 +250,8 @@ async def start_ingestion(
             message="Workflow started successfully"
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error starting ingestion: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
